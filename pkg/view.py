@@ -63,12 +63,12 @@ def caption_crs_name(epsg: int) -> bool:
 
 
 def show_params(
-        cnt_i: int,
-        cnt_j: int,
-        ij_start: int,
-        col_v: str,
-        epsg: int | None
-    ) -> None:
+    cnt_i: int,
+    cnt_j: int,
+    ij_start: int,
+    col_v: str,
+    epsg: int | None
+) -> None:
     """
     Show mesh parameters
 
@@ -85,19 +85,19 @@ def show_params(
     epsg : int | None
         EPSG code
     """
-    st.write(':material/Check: メッシュ条件')
-    st.write(f"""
+    st.markdown(':material/Check: メッシュ条件')
+    st.markdown(f""":small[
         I 方向の格子点数: :gray-background[{cnt_i}]  
         J 方向の格子点数: :gray-background[{cnt_j}]  
         IJ の開始番号: :gray-background[{ij_start}]  
         メッシュの属性名: :gray-background[{col_v}]  
-        EPSG コード: :gray-background[{epsg}]
+        EPSG コード: :gray-background[{epsg}]]
     """)
     st.caption(f"""
         I 方向のメッシュ数: :gray-background[{cnt_i - 1}]  
         J 方向のメッシュ数: :gray-background[{cnt_j - 1}]
     """)
     if epsg is not None:
-        caption_crs_name(epsg)
+        caption_crs_name(epsg=epsg)
     else:
         st.caption('座標系: 指定なし')

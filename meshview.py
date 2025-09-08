@@ -6,9 +6,9 @@ from pkg import view
 
 
 def callback_apply_edited_rows(
-        key_data_editor: str,
-        key_target: str
-    ) -> None:
+    key_data_editor: str,
+    key_target: str
+) -> None:
     """
     Apply edited rows to target dataframe
 
@@ -22,14 +22,14 @@ def callback_apply_edited_rows(
     """
     dict_edited_rows = st.session_state[key_data_editor]['edited_rows']
     for idx, dict_edited_row in dict_edited_rows.items():
-            for col, val in dict_edited_row.items():
-                st.session_state[key_target].loc[idx, col] = val
+        for col, val in dict_edited_row.items():
+            st.session_state[key_target].loc[idx, col] = val
 
 
 def callback_set_step_df(
-        step: int,
-        key: str | None = None
-    ) -> None:
+    step: int,
+    key: str | None = None
+) -> None:
     """
     Switch step on this app and determine st.session_state['df_pt']
 
@@ -69,7 +69,7 @@ def main():
         layout='wide'
     )
     st.title('MeshView')
-    st.write('メッシュビュー')
+    st.markdown('メッシュビュー')
     st.caption('格子点の座標を指定し、メッシュの属性値に応じて色付けします')
 
     if 'step' not in st.session_state:
@@ -83,69 +83,63 @@ def main():
 
     if st.session_state['step'] == 1:
         with st.container(border=True):
-            st.write(':memo: メッシュの条件を入力してください')
-            col1, col2, col3, col4 = st.columns([0.25, 0.2, 0.2, 0.35])
-            with col1:
-                st.write(':material/Check: I 方向の格子点数')
+            st.markdown(':memo: メッシュの条件を入力してください')
+            with st.container(border=True):
                 st.session_state['cnt_i'] = st.number_input(
-                    label='_',
+                    label='I 方向の格子点数',
                     min_value=2,
                     step=1,
-                    key='_cnt_i',
-                    label_visibility='collapsed'
+                    key='_cnt_i'
                 )
-                st.write(':material/Check: J 方向の格子点数')
+            with st.container(border=True):
                 st.session_state['cnt_j'] = st.number_input(
-                    label='_',
+                    label='J 方向の格子点数',
                     min_value=2,
                     step=1,
-                    key='_cnt_j',
-                    label_visibility='collapsed'
+                    key='_cnt_j'
                 )
-            with col2:
-                st.write(':material/Check: IJ の開始番号')
+            with st.container(border=True):
                 st.session_state['ij_start'] = st.radio(
-                    label='_',
+                    label='I J の開始番号',
                     options=[0, 1],
                     format_func=lambda x: f'{x} 始まり',
-                    key='_ij_start',
-                    label_visibility='collapsed'
+                    key='_ij_start'
                 )
-            with col3:
-                st.write(':material/Check: メッシュの属性名')
+            with st.container(border=True):
                 st.session_state['col_v'] = st.text_input(
-                    label='_',
+                    label='メッシュの属性名',
                     value='Z',
-                    key='_col_v',
-                    label_visibility='collapsed'
+                    key='_col_v'
                 )
-            with col4:
-                st.write(':material/Check: 座標系の EPSG コード（=WKID）')
-                st.caption(body='英数字で入力してください（マップを表示しない場合は不要）')
+            with st.container(border=True):
                 if 'epsg' not in st.session_state:
                     st.session_state['epsg'] = None
 
                 st.text_input(
-                    label='_',
+                    label='座標系の EPSG コード（=WKID）',
                     value=st.session_state['epsg'],
                     key='_epsg',
-                    on_change=callback_set_epsg,
-                    label_visibility='collapsed'
+                    on_change=callback_set_epsg
                 )
+
                 if st.session_state['epsg'] is not None:
-                    is_valid_epsg = view.caption_crs_name(st.session_state['epsg'])
+                    is_valid_epsg = view.caption_crs_name(
+                        epsg=st.session_state['epsg']
+                    )
                     if not is_valid_epsg:
                         st.session_state['epsg'] = None
+                else:
+                    st.caption('座標系の指定なし（マップは表示されません）')
 
                 view.link_wkid()
 
-        if st.button(
-            label='確定',
-            key='confirm1',
-            on_click=callback_set_step_df,
-            args=(2,)
-        ):
-            st.rerun()
+            if st.button(
+                label='確定',
+                key='confirm1',
+                on_click=callback_set_step_df,
+                args=(2,)
+            ):
+                st.rerun()
 
     if st.session_state['step'] == 2:
         cnt_i = st.session_state['cnt_i']
@@ -157,13 +151,19 @@ def main():
         max_i = cnt_i + ij_start - 1
         max_j = cnt_j + ij_start - 1
 
-        col1, col2 = st.columns([0.25, 0.75], border=True)
+        col1, col2 = st.columns(spec=[0.25, 0.75], border=True)
         with col1:
-            view.show_params(cnt_i, cnt_j, ij_start, col_v, epsg)
+            view.show_params(
+                cnt_i=cnt_i,
+                cnt_j=cnt_j,
+                ij_start=ij_start,
+                col_v=col_v,
+                epsg=epsg
+            )
         with col2:
-            st.write(':memo: 格子点の XY 座標とメッシュの属性値を指定してください')
+            st.markdown(':memo: 格子点の XY 座標とメッシュの属性値を指定してください')
 
-            tab_manual, tab_upload = st.tabs(['値入力で指定', 'ファイルで指定'])
+            tab_manual, tab_upload = st.tabs(tabs=['値入力で指定', 'ファイルで指定'])
 
             with tab_manual:
                 if 'df_manual' not in st.session_state:
@@ -207,9 +207,11 @@ def main():
                     )
                 }
 
-                st.write(f"""
-                    :material/Check: X座標（格子点）、Y座標（格子点）、:gray-background[{col_v}]（メッシュ）を入力  
-                    （コピペできます）
+                st.markdown(f"""
+                :small[
+                    格子点の X座標 と Y座標、
+                    メッシュの :gray-background[{col_v}] を入力 （コピペできます）
+                ]
                 """)
                 st.data_editor(
                     data=st.session_state['df_manual'],
@@ -230,69 +232,68 @@ def main():
                     st.rerun()
 
             with tab_upload:
-                col1, col2 = st.columns(2)
-                with col1:
-                    st.write(':material/Check: 区切り文字')
+                with st.container(border=True):
                     delimit = st.text_input(
-                        label='_',
+                        label='区切り文字',
                         value=',',
-                        max_chars=1,
-                        label_visibility='collapsed'
+                        max_chars=1
                     )
-                with col2:
-                    st.write(':material/Check: ヘッダ行数')
+                with st.container(border=True):
                     num_header = st.number_input(
-                        '_',
+                        label='ヘッダ行数',
                         min_value=0,
                         value=1,
-                        step=1,
-                        label_visibility='collapsed'
-                    )
-
-                st.write(':material/Check: 列番号')
-                col1, col2, col3, col4, col5 = st.columns(5, vertical_alignment='bottom')
-                with col1:
-                    ncol_i = st.number_input(
-                        'I番号',
-                        min_value=1,
-                        value=1,
-                        step=1
-                    )
-                with col2:
-                    ncol_j = st.number_input(
-                        'J番号',
-                        min_value=1,
-                        value=2,
-                        step=1
-                    )
-                with col3:
-                    ncol_x = st.number_input(
-                        'X座標（格子点）',
-                        min_value=1,
-                        value=3,
-                        step=1
-                    )
-                with col4:
-                    ncol_y = st.number_input(
-                        'Y座標（格子点）',
-                        min_value=1,
-                        value=4,
-                        step=1
-                    )
-                with col5:
-                    ncol_v = st.number_input(
-                        f':gray-background[{col_v}]（メッシュ）',
-                        min_value=1,
-                        value=5,
                         step=1
                     )
 
-                st.write(':material/Check: ファイル')
-                uploaded_file = st.file_uploader(
-                    '_',
-                    accept_multiple_files=False,
-                    label_visibility='collapsed'
-                )
+                with st.container(border=True):
+                    st.markdown(':small[列番号]')
+                    col1, col2, col3, col4, col5 = st.columns(
+                        spec=5,
+                        vertical_alignment='bottom'
+                    )
+                    with col1:
+                        ncol_i = st.number_input(
+                            label='I番号',
+                            min_value=1,
+                            value=1,
+                            step=1
+                        )
+                    with col2:
+                        ncol_j = st.number_input(
+                            label='J番号',
+                            min_value=1,
+                            value=2,
+                            step=1
+                        )
+                    with col3:
+                        ncol_x = st.number_input(
+                            label='X座標（格子点）',
+                            min_value=1,
+                            value=3,
+                            step=1
+                        )
+                    with col4:
+                        ncol_y = st.number_input(
+                            label='Y座標（格子点）',
+                            min_value=1,
+                            value=4,
+                            step=1
+                        )
+                    with col5:
+                        ncol_v = st.number_input(
+                            label=f':gray-background[{col_v}]（メッシュ）',
+                            min_value=1,
+                            value=5,
+                            step=1
+                        )
+
+                with st.container(border=True):
+                    uploaded_file = st.file_uploader(
+                        label='ファイル',
+                        accept_multiple_files=False
+                    )
+
                 is_correct_ij = False
                 if uploaded_file is not None:
                     try:
@@ -312,12 +313,12 @@ def main():
                             skipinitialspace=True
                         )
 
-                        st.write(':material/Check: 読込結果')
+                        st.markdown(':small[読込結果]')
                         try:
                             is_correct_ij = all((
-                                    st.session_state['df_manual'][['I', 'J']] \
-                                        == df_upload[['I', 'J']].sort_values(['I', 'J'])
-                                ).all())
+                                st.session_state['df_manual'][['I', 'J']] \
+                                == df_upload[['I', 'J']].sort_values(['I', 'J'])
+                            ).all())
                         except ValueError:
                             is_correct_ij = False
 
@@ -327,8 +328,6 @@ def main():
                                 hide_index=True
                             )
                             st.session_state['df_upload'] = df_upload
-
-
                         else:
                             if not len(df_upload) == cnt_i * cnt_j:
                                 st.error('行数が正しくありません')
@@ -361,41 +360,28 @@ def main():
         max_i = cnt_i + ij_start - 1
         max_j = cnt_j + ij_start - 1
 
-        col1, col2 = st.columns([0.25, 0.75], border=True)
+        col1, col2 = st.columns(spec=[0.25, 0.75], border=True)
         with col1:
-            view.show_params(cnt_i, cnt_j, ij_start, col_v, epsg)
+            view.show_params(
+                cnt_i=cnt_i,
+                cnt_j=cnt_j,
+                ij_start=ij_start,
+                col_v=col_v,
+                epsg=epsg
+            )
         with col2:
-            st.write(':memo: メッシュの表示設定')
+            st.markdown(':memo: メッシュの表示設定')
 
-            col21, col22, col23 = st.columns(3)
-            with col22:
-                st.write(f':material/Check: :gray-background[{col_v}] ダミー値')
+            with st.container(border=True):
                 dummy_v = st.number_input(
-                    '_',
+                    label=f':gray-background[{col_v}] ダミー値',
                     value=None,
-                    format='%0.3f',
-                    placeholder='指定なし',
-                    label_visibility='collapsed'
+                    format='%0.3f'
                 )
-                if epsg is not None:
-                    st.write(':material/Check: 透過率')
-                    mesh_opacity = 1.0 - st.slider(
-                        '_',
-                        min_value=0.0,
-                        max_value=1.0,
-                        value=0.3,
-                        step=0.1,
-                        format='%0.1f',
-                        key='_mesh_opacity',
-                        label_visibility='collapsed'
-                    )
-                else:
-                    pass
-
-            with col21:
-                st.write(f':material/Check: :gray-background[{col_v}] 表示レンジ')
+            with st.container(border=True):
+                st.markdown(f':small[:gray-background[{col_v}] 表示レンジ]')
                 range_auto = st.toggle(
-                    '自動',
+                    label='自動',
                     value=True
                 )
 
@@ -408,13 +394,13 @@ def main():
                     min_v = df_v[col_v].min()
                 else:
                     max_v = st.number_input(
-                        '最大値',
+                        label='最大値',
                         value=df_v[col_v].max(),
                         format='%0.3f',
                         disabled=range_auto
                     )
                     min_v = st.number_input(
-                        '最小値',
+                        label='最小値',
                         value=df_v[col_v].min(),
                         format='%0.3f',
                         disabled=range_auto
@@ -427,62 +413,74 @@ def main():
                     range_v = None
                     range_auto = True
 
-            with col23:
-                st.write(':material/Check: カラースケール')
+            with st.container(border=True):
                 if epsg is not None:
-                    color = st.selectbox(
-                        '_',
-                        options=model.COLORS_PLOTLY,
-                        index=model.COLORS_PLOTLY.index('Viridis'),
-                        label_visibility='collapsed'
+                    mesh_opacity = 1.0 - st.slider(
+                        label='透過率',
+                        min_value=0.0,
+                        max_value=1.0,
+                        value=0.3,
+                        step=0.1,
+                        format='%0.1f',
+                        key='_mesh_opacity'
                     )
-                    reverse = st.toggle('反転')
+                else:
+                    pass
+
+            with st.container(border=True):
+                if epsg is not None:
+                    col1, col2 = st.columns(spec=2, vertical_alignment='bottom')
+                    with col1:
+                        color = st.selectbox(
+                            label='カラースケール',
+                            options=model.COLORS_PLOTLY,
+                            index=model.COLORS_PLOTLY.index('Viridis')
+                        )
+                    with col2:
+                        reverse = st.toggle(label='反転')
                     view.link_color_scales()
                 else:
-                    color = st.selectbox(
-                        '_',
-                        options=model.COLORS_MATPLOTLIB,
-                        index=model.COLORS_MATPLOTLIB.index('viridis'),
-                        label_visibility='collapsed'
-                    )
-                    reverse = st.toggle('反転')
+                    col1, col2 = st.columns(spec=2, vertical_alignment='bottom')
+                    with col1:
+                        color = st.selectbox(
+                            label='カラースケール',
+                            options=model.COLORS_MATPLOTLIB,
+                            index=model.COLORS_MATPLOTLIB.index('viridis')
+                        )
+                    with col2:
+                        reverse = st.toggle(label='反転')
                     view.link_colormaps()
 
                 color = f'{color}_r' if reverse else color
 
         if epsg is not None:
             with st.container(border=True):
-                st.write(':memo: ベースマップの表示設定')
-                col21, col22, col23 = st.columns(3)
-                with col21:
-                    st.write(':material/Check: 種類')
+                st.markdown(':memo: ベースマップの表示設定')
+
+                with st.container(border=True):
                     tile = st.selectbox(
-                        '_',
+                        label='種類',
                         options=model.TILES,
-                        format_func=lambda tile: tile.name,
-                        label_visibility='collapsed'
+                        format_func=lambda tile: tile.name
                     )
-                with col22:
-                    st.write(':material/Check: 透過率')
+
+                with st.container(border=True):
                     tile_opacity = 1.0 - st.slider(
-                        '_',
+                        label='透過率',
                         min_value=0.0,
                         max_value=1.0,
                         value=0.3,
                         step=0.1,
                         format='%0.1f',
-                        key='_tile_opacity',
-                        label_visibility='collapsed'
+                        key='_tile_opacity'
                     )
-                with col23:
-                    st.write(':material/Check: ズームレベル')
+                with st.container(border=True):
                     zoom_level = st.slider(
-                        '_',
+                        label='ズームレベル',
                         min_value=0,
                         max_value=20,
                         value=12,
-                        step=1,
-                        label_visibility='collapsed'
+                        step=1
                     )
 
         meshs = model.Meshs(
@@ -492,7 +490,7 @@ def main():
         )
 
         with st.container(border=True):
-            st.write(':sparkles: メッシュ表示')
+            st.markdown(':sparkles: メッシュ表示')
             if epsg is not None:
                 # Plotly plot
                 fig = meshs.choropleth_map(
@@ -511,7 +509,7 @@ def main():
 
                 @st.fragment
                 def download_map():
-                    st.write(':material/Check: HTML データ')
+                    st.markdown(':small[HTML データ]')
                     with st.spinner():
                         st.download_button(
                             label='Download',
@@ -531,46 +529,46 @@ def main():
 
                 @st.fragment
                 def download_plot():
-                    st.write(':material/Check: 画像データ')
-                    ext = st.selectbox(
-                        '_',
-                        options=model.EXT_PLOT,
-                        label_visibility='collapsed',
-                        width=200
-                    )
-                    with st.spinner():
-                        st.download_button(
-                            label='Download',
-                            data=meshs.zip_plot(fig, ext),
-                            file_name='plot.zip',
-                            mime='application/zip'
+                    col1, col2 = st.columns(spec=2, vertical_alignment='bottom')
+                    with col1:
+                        ext = st.selectbox(
+                            label='画像データ',
+                            options=model.EXT_PLOT
                         )
+                    with col2:
+                        with st.spinner():
+                            st.download_button(
+                                label='Download',
+                                data=meshs.zip_plot(fig, ext),
+                                file_name='plot.zip',
+                                mime='application/zip'
+                            )
 
         with st.container(border=True):
-            st.write(':sparkles: ダウンロード')
+            st.markdown(':sparkles: ダウンロード')
 
             @st.fragment
             def download_gis():
-                st.write(':material/Check: GIS データ')
-                driver = st.selectbox(
-                    '_',
-                    options=model.DRIVER2EXT.keys(),
-                    label_visibility='collapsed',
-                    width=200
-                )
-                ext = model.DRIVER2EXT[driver]
-                with st.spinner():
-                    st.download_button(
-                        label='Download',
-                        data=meshs.zip_gis(driver, ext),
-                        file_name='mesh.zip',
-                        mime='application/zip'
+                col1, col2 = st.columns(spec=2, vertical_alignment='bottom')
+                with col1:
+                    driver = st.selectbox(
+                        label='GIS データ',
+                        options=model.DRIVER2EXT.keys()
                     )
+                    ext = model.DRIVER2EXT[driver]
+                with col2:
+                    with st.spinner():
+                        st.download_button(
+                            label='Download',
+                            data=meshs.zip_gis(driver, ext),
+                            file_name='mesh.zip',
+                            mime='application/zip'
+                        )
 
-            col1, col2 = st.columns(2)
-            with col1:
+            with st.container(border=True):
                 download_gis()
-            with col2:
+
+            with st.container(border=True):
                 if epsg is not None:
                     download_map()
                 else:

@@ -96,15 +96,15 @@ class Meshs:
         columns are col_i, col_j, col_v, and 'geometry'
     """
     def __init__(
-            self,
-            df: pd.DataFrame,
-            col_v: str,
-            epsg: int | None,
-            col_i = 'I',
-            col_j = 'J',
-            col_x = 'X',
-            col_y = 'Y'
-        ) -> None:
+        self,
+        df: pd.DataFrame,
+        col_v: str,
+        epsg: int | None,
+        col_i = 'I',
+        col_j = 'J',
+        col_x = 'X',
+        col_y = 'Y'
+    ) -> None:
         self.col_i = col_i
         self.col_j = col_j
         self.col_x = col_x
@@ -149,15 +149,15 @@ class Meshs:
         self.gdf = gdf
 
     def choropleth_map(
-            self,
-            dummy_v: float | None,
-            range_v: list[float] | None,
-            colorscale: str,
-            mesh_opacity: float,
-            zoom_level: int,
-            tile: TILE,
-            tile_opacity: float
-        ) -> go.Figure:
+        self,
+        dummy_v: float | None,
+        range_v: list[float] | None,
+        colorscale: str,
+        mesh_opacity: float,
+        zoom_level: int,
+        tile: TILE,
+        tile_opacity: float
+    ) -> go.Figure:
         """
         Choropleth map based on plotly
         Mesh must have epsg
@@ -234,11 +234,11 @@ class Meshs:
         return fig
 
     def plot(
-            self,
-            dummy_v: float | None,
-            range_v: list[float] | None,
-            cmap: str
-        ) -> Figure:
+        self,
+        dummy_v: float | None,
+        range_v: list[float] | None,
+        cmap: str
+    ) -> Figure:
         """
         Choropleth map based on matplotlib
         EPSG is not necessary
@@ -264,7 +264,7 @@ class Meshs:
         fig, ax = plt.subplots(tight_layout=True)
 
         divider = make_axes_locatable(ax)
-        cax = divider.append_axes('right', size='5%', pad='3%')
+        cax = divider.append_axes(position='right', size='5%', pad='3%')
 
         ax.grid(linewidth=0.5)
         ax.set_axisbelow(True)
@@ -282,10 +282,10 @@ class Meshs:
         return fig
 
     def zip_plot(
-            self,
-            fig: Figure,
-            ext: str
-        ) -> BytesIO:
+        self,
+        fig: Figure,
+        ext: str
+    ) -> BytesIO:
         """
         Zip plot to image
 
@@ -304,18 +304,25 @@ class Meshs:
         filename = 'plot'
 
         with tempfile.TemporaryDirectory() as tmpdir:
-            with zipfile.ZipFile(in_memory, 'w', zipfile.ZIP_DEFLATED) as zf:
+            with zipfile.ZipFile(
+                file=in_memory,
+                mode='w',
+                compression=zipfile.ZIP_DEFLATED
+            ) as zf:
 
                 filepath = os.path.join(tmpdir, f'{filename}.{ext}')
-                fig.savefig(filepath)
-                zf.write(filepath, os.path.basename(filepath))
+                fig.savefig(fname=filepath)
+                zf.write(
+                    filename=filepath,
+                    arcname=os.path.basename(filepath)
+                )
 
         return in_memory
 
     def zip_map(
-            self,
-            fig: go.Figure
-        ) -> BytesIO:
+        self,
+        fig: go.Figure
+    ) -> BytesIO:
         """
         Zip choropleth map to html
 
@@ -331,18 +338,25 @@ class Meshs:
         in_memory = BytesIO()
         filename = 'map'
 
-        with zipfile.ZipFile(in_memory, 'w', zipfile.ZIP_DEFLATED) as zf:
+        with zipfile.ZipFile(
+            file=in_memory,
+            mode='w',
+            compression=zipfile.ZIP_DEFLATED
+        ) as zf:
 
             fig_bytes = fig.to_html()
-            zf.writestr(f'{filename}.html', fig_bytes)
+            zf.writestr(
+                zinfo_or_arcname=f'{filename}.html',
+                data=fig_bytes
+            )
 
         return in_memory
 
     def zip_gis(
-            self,
-            driver: str,
-            ext: str
-        ) -> BytesIO:
+        self,
+        driver: str,
+        ext: str
+    ) -> BytesIO:
         """
         Zip GIS file
 
@@ -361,7 +375,11 @@ class Meshs:
         filename = 'mesh'
 
         with tempfile.TemporaryDirectory() as tmpdir:
-            with zipfile.ZipFile(in_memory, 'w', zipfile.ZIP_DEFLATED) as zf:
+            with zipfile.ZipFile(
+                file=in_memory,
+                mode='w',
+                compression=zipfile.ZIP_DEFLATED
+            ) as zf:
 
                 filepath = os.path.join(tmpdir, f'{filename}.{ext}')
                 with warnings.catch_warnings(
@@ -369,11 +387,19 @@ class Meshs:
                     category=UserWarning
                 ):
                     # hide UserWarning('crs' was not provided ...)
-                    self.gdf.to_file(filepath, driver=driver)
+                    self.gdf.to_file(
+                        filename=filepath,
+                        driver=driver
+                    )
 
-                files = glob.glob(os.path.join(tmpdir, f'{filename}.*'))
+                files = glob.glob(
+                    pathname=os.path.join(tmpdir, f'{filename}.*')
+                )
 
                 for file in files:
-                    zf.write(file, os.path.basename(file))
+                    zf.write(
+                        filename=file,
+                        arcname=os.path.basename(file)
+                    )
 
         return in_memory
