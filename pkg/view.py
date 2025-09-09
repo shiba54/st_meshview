@@ -40,7 +40,7 @@ def link_colormaps() -> None:
     )
 
 
-def caption_crs_name(epsg: int) -> bool:
+def caption_crs_name(epsg: int | None) -> bool:
     """
     Caption crs name
 
@@ -53,12 +53,16 @@ def caption_crs_name(epsg: int) -> bool:
     --------
     True if valid epsg else False
     """
+    if epsg is None:
+        st.caption('座標系: :gray-background[指定なし]')
+        return False
+
     try:
         crs = CRS.from_epsg(epsg)
-        st.caption(f"座標系の名称: :gray-background[{crs.name}]")
+        st.caption(f"座標系: :gray-background[{crs.name}]")
         return True
     except exceptions.CRSError:
-        st.caption('座標系の名称: :gray-background[該当なし]')
+        st.caption('座標系: :gray-background[該当なし]')
         return False
 
 
@@ -97,7 +101,4 @@ def show_params(
         I 方向のメッシュ数: :gray-background[{cnt_i - 1}]  
         J 方向のメッシュ数: :gray-background[{cnt_j - 1}]
     """)
-    if epsg is not None:
-        caption_crs_name(epsg=epsg)
-    else:
-        st.caption('座標系: 指定なし')
+    caption_crs_name(epsg=epsg)

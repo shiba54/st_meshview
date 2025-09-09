@@ -119,6 +119,11 @@ def main():
                     label='座標系の EPSG コード（=WKID）',
                     value=st.session_state['epsg'],
                     key='_epsg',
+                    help="""
+                    コードを指定すると、メッシュはマップ上に表示されます。  
+                    指定しない場合、メッシュはグラフ上に表示されます。
+                    """,
+                    placeholder='e.g. 0000 (optional)',
                     on_change=callback_set_epsg
                 )
 
@@ -129,7 +134,7 @@ def main():
                     if not is_valid_epsg:
                         st.session_state['epsg'] = None
                 else:
-                    st.caption('座標系の指定なし（マップは表示されません）')
+                    view.caption_crs_name(epsg=None)
 
                 view.link_wkid()
 
