@@ -116,7 +116,7 @@ def main():
                     st.session_state['epsg'] = None
 
                 st.text_input(
-                    label='座標系の EPSG コード（=WKID）',
+                    label='座標系の EPSG コード',
                     value=st.session_state['epsg'],
                     key='_epsg',
                     help="""
